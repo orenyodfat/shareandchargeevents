@@ -141,4 +141,13 @@
         android:layout_height="wrap_content"
         android:text="" />
 
+
+    <TextView
+        android:id="@+id/hireme"
+        android:layout_below="@+id/param4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="15dp"
+        android:text="HIRE ME :)" />
+
 </RelativeLayout>
