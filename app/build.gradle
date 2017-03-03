@@ -10,6 +10,15 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        multiDexEnabled true
+        splits {
+            abi {
+                enable true
+                reset()
+                include 'x86', 'armeabi-v7a', 'mips'
+                universalApk true
+            }
+        }
 //        jackOptions {
 //            enabled true
 //         //   jackInProcess false
@@ -34,9 +43,6 @@ android {
 //    sourceCompatibility JavaVersion.VERSION_1_8
 //    targetCompatibility JavaVersion.VERSION_1_8
 //   }
-    dexOptions {
-        javaMaxHeapSize '4096m'
-    }
 }
 
 
