@@ -27,7 +27,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import rx.Subscription;
 import rx.functions.Action1;
 
 /**
@@ -47,6 +46,16 @@ public class Eventhadling extends Contract {
     private static Listener<BigInteger> Blockslistener;
     private static final boolean WITH_LOG_HISTORY = false;
 
+
+
+
+    public void getBlockNumberThread()
+    {
+       /*The current block number can be fetch using observer..
+         but for some reosone it does not work when using more than 3 observers*/
+        new GetBlockNumber(Blockslistener).execute();
+    }
+
     public Eventhadling(String contractAddress, Web3j web3j, TransactionManager transactionManager, BigInteger gasPrice, BigInteger gasLimit) {
         super(contractAddress, web3j, transactionManager, gasPrice, gasLimit);
     }
@@ -61,9 +70,12 @@ public class Eventhadling extends Contract {
         this.Blockslistener = blockListner;
         new Web3Connect().execute();
     }
+
+
+
+
     private void CreateWeb3Connection()
     {
-        String infura = "https://mainnet.infura.io/orenshare&chargetoken";
         String mynode = "http://ec2-52-17-240-245.eu-west-1.compute.amazonaws.com:8545";
         web3 = Web3jFactory.build(new HttpService(mynode));
         Web3ClientVersion web3ClientVersion = null;
@@ -75,32 +87,12 @@ public class Eventhadling extends Contract {
         final String clientVersion = web3ClientVersion.getWeb3ClientVersion();
         Log.e(TAG,"clientVersion ->" + clientVersion );
         Versionlistener.getResult(clientVersion);
-
-        //MainActivity.ShowNodeVersion(clientVersion);
-
-
-        Subscription subscription = web3.blockObservable(false).subscribe(new Action1<EthBlock>() {
-
-            @Override
-            public void call(EthBlock ethBlock) {
-
-                Log.e(TAG,"ethBlock ->" + ethBlock.getBlock().getNumber() );
-                Blockslistener.getResult( ethBlock.getBlock().getNumber());
-
-
-            }
-        });
-
-
-      //  eventlistener_LogPoleSetUp(CONTRACT_ADDRESS,"LogPoleSetUp");
+        eventlistener_LogPoleSetUp(CONTRACT_ADDRESS,"LogPoleSetUp");
         eventlistener_LogRented(CONTRACT_ADDRESS,"LogRented");
         eventlistener_LogReturned(CONTRACT_ADDRESS,"LogReturned");
 
-        Log.e(TAG,"now ");
-
-
-
     }
+
     public class Web3Connect extends AsyncTask<String, Void, String> {
 
 
@@ -122,10 +114,14 @@ public class Eventhadling extends Contract {
             //onPostExecute
         }
     }
+
+
+
+
     void eventlistener_LogPoleSetUp(String contractAddress, final String eventname) {
 
 
-        Log.e(TAG, "eventlistener");
+        Log.e(TAG, "eventlistener_LogPoleSetUp");
         //   Event event = new Event(eventname, Arrays.<TypeReference<?>>asList(new TypeReference<Bytes32>() {}), Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {}, new TypeReference<Uint256>() {},new TypeReference<Uint256>() {}));
 
         final Event event = new Event(eventname, Arrays.<TypeReference<?>>asList(new TypeReference<Bytes32>() {
@@ -309,6 +305,47 @@ public class Eventhadling extends Contract {
         public BigInteger wattPower ;
         public BigInteger blocknumber;
 
+    }
+
+    public class GetBlockNumber extends AsyncTask<String, Void, BigInteger> {
+
+
+        private  Listener<BigInteger> mBlockslistener;
+        // constructor
+        public GetBlockNumber(Listener<BigInteger> blockslistener) {
+            this.mBlockslistener =blockslistener;
+
+        }
+        @Override
+        protected BigInteger doInBackground(String... params) {
+
+
+            try {
+                if (web3!= null) {
+                    EthBlock ethBlock = web3.ethGetBlockByNumber(DefaultBlockParameterName.LATEST, false).send();
+                    Log.e(TAG, "BLOCK->" + ethBlock.getBlock().getNumber());
+                    mBlockslistener.getResult(ethBlock.getBlock().getNumber());
+                   return  ethBlock.getBlock().getNumber();
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
+
+        }
+        protected void onPostExecute(BigInteger blocknum)
+        {
+            if (blocknum!=null) {
+                Log.e(TAG, "BLOCK2->" + blocknum.toString());
+                mBlockslistener.getResult(blocknum);
+            }
+            else
+            {
+                Log.e(TAG, "BLOCK->null");
+            }
+            //onPostExecute
+        }
     }
 
 }

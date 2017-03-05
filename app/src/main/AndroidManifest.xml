@@ -26,10 +26,6 @@
             android:name=".web3service"
             android:enabled="true"
             android:exported="true" />
-        <service
-            android:name=".Web3service"
-            android:enabled="true"
-            android:exported="true"></service>
     </application>
 
 </manifest>
